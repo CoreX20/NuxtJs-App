@@ -20,6 +20,10 @@ export default {
     ]
   },
 
+  privateRuntimeConfig: {
+    myPrivateToken: process.env.API_ACCESS_TOKEN
+  },
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 

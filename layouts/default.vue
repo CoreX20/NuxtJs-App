@@ -2,7 +2,7 @@
   <div id="app">
     <HeaderWeb />
 
-    <Nuxt />
+    <Nuxt keep-alive />
 
     <FooterWeb />
   </div>

@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-transparent">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Tugas 2 NuxtJs</a>
+      <a class="navbar-brand" href="#">Tugas 4 NuxtJs</a>
       <button
         class="navbar-toggler"
         type="button"

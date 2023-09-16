@@ -44,6 +44,8 @@
       </button>
       <button type="button" class="btn btn-info" @click="nextPage">Next</button>
     </div>
+    <!-- Loading -->
+    <loadingCard v-if="$fetchState.pending" />
 
     <!-- Search Movies -->
     <div v-if="searchQuery !== ''" class="row">
@@ -135,7 +137,7 @@
       </div>
     </div>
 
-    <!-- Movies -->
+    <!-- Movies  -->
     <div v-else class="row">
       <div
         v-for="(movie, index) in movies"
@@ -184,7 +186,9 @@
 
 <script>
 import axios from 'axios'
+import loadingCard from '../components/loadingCard.vue'
 export default {
+  components: { loadingCard },
   data() {
     return {
       movies: [],
@@ -247,6 +251,7 @@ export default {
     }
     await this.searchMovies()
   },
+  fetchDelay: 1000,
   computed: {
     filteredMovies() {
       if (this.selectedGenre === '') {
@@ -264,7 +269,7 @@ export default {
         `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${this.page}`,
         {
           headers: {
-            Authorization: process.env.API_ACCESS_TOKEN,
+            Authorization: this.$config.myPrivateToken,
             accept: 'application/json',
           },
         }
@@ -279,7 +284,7 @@ export default {
         `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1&query=${this.searchQuery}`,
         {
           headers: {
-            Authorization: process.env.API_ACCESS_TOKEN,
+            Authorization: this.$config.myPrivateToken,
             accept: 'application/json',
           },
         }
@@ -320,6 +325,7 @@ export default {
   opacity: 0;
   transition: 0.3s ease-in-out;
 }
+
 .card:hover .opacity0 {
   opacity: 1;
 }

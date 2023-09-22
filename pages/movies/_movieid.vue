@@ -40,9 +40,30 @@
       </div>
     </div>
 
+    <!-- Trailer -->
+    <div class="row justify-content-center mt-5">
+      <h1 class="text-white">Trailers</h1>
+      <div
+        v-for="(trailer, index) in visibleTrailers"
+        :key="index"
+        class="col-12 col-lg-6 mb-3"
+      >
+        <div v-if="trailer.site === 'YouTube'" class="player">
+          <video-player
+            :src="`https://www.youtube.com/embed/${trailer.key}?rel=0`"
+          />
+        </div>
+        <div v-else-if="trailer.site === 'Vimeo'" class="player">
+          <video-player
+            :src="`https://player.vimeo.com/video/${trailer.key}`"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Input Comment -->
-    <div class="row d-flex justify-content-center mt-5">
-      <h1 class="text-white">Comment</h1>
+    <div class="row d-flex justify-content-center mt-2">
+      <h1 class="text-white">Comments</h1>
       <div class="col-12">
         <div class="card">
           <div class="card-body p-4">
@@ -138,13 +159,17 @@
 
 <script>
 import axios from 'axios'
+import VideoPlayer from 'nuxt-video-player'
 import loadingCard from '../../components/loadingCard.vue'
+
+require('nuxt-video-player/src/assets/css/main.css')
 export default {
-  components: { loadingCard },
+  components: { loadingCard, VideoPlayer },
   data() {
     return {
       movie: null,
       reviews: [],
+      trailers: [],
       newReview: {
         author: 'Anonymous',
         author_details: {
@@ -158,6 +183,24 @@ export default {
   async fetch() {
     await this.getSingleMovie()
     await this.getReviews()
+    await this.getTrailers()
+  },
+  computed: {
+    visibleTrailers() {
+      const filteredTrailers = this.trailers.filter((trailer) => {
+        return trailer.type === 'Trailer'
+      })
+
+      if (filteredTrailers.length > 0) {
+        if (filteredTrailers.length === 1) {
+          return [filteredTrailers[0], this.trailers[0]]
+        } else {
+          return filteredTrailers.slice(0, 2)
+        }
+      } else {
+        return this.trailers.slice(0, 2)
+      }
+    },
   },
   /* computed: {
     sortedReviews() {
@@ -194,6 +237,21 @@ export default {
       const result = await data
       result.data.results.forEach((review) => {
         this.reviews.push(review)
+      })
+    },
+    async getTrailers() {
+      const data = axios.get(
+        `https://api.themoviedb.org/3/movie/${this.$route.params.movieid}/videos?language=en-US`,
+        {
+          headers: {
+            Authorization: this.$config.myPrivateToken,
+            accept: 'application/json',
+          },
+        }
+      )
+      const result = await data
+      result.data.results.forEach((trailer) => {
+        this.trailers.push(trailer)
       })
     },
     handleSubmit() {

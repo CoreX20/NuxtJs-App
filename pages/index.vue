@@ -1,182 +1,170 @@
 <template>
-  <div class="container-fluid px-5 py-3 position-relative">
-    <!-- Search Feature -->
-    <div class="mb-3">
-      <input
-        v-model.lazy="searchQuery"
-        placeholder="Search"
-        type="text"
-        @keyup.enter="$fetch"
-      />
-      <button
-        v-show="searchQuery !== ''"
-        class="btn btn-primary"
-        type="button"
-        @click="clearSearch"
-      >
-        Clear
-      </button>
-
-      <div class="text-white mt-3">
-        <label>Filter by Genre:</label>
-        <select v-model="selectedGenre">
-          <option value="">All</option>
-          <option
-            v-for="(genre, index) in genres"
-            :key="index"
-            :value="genre.id"
-          >
-            {{ genre.name }}
-          </option>
-        </select>
+  <div class="home">
+    <!-- Hero -->
+    <heroComponent @search-query="handleSearchQuery" />
+    <div class="container-fluid px-5 py-3 position-relative">
+      <!-- Search Feature -->
+      <div class="w-25 mb-3">
+        <div class="text-white mt-3">
+          <label>Filter by Genre:</label>
+          <select v-model="selectedGenre" class="form-select">
+            <option selected value="">All</option>
+            <option
+              v-for="(genre, index) in genres"
+              :key="index"
+              :value="genre.id"
+            >
+              {{ genre.name }}
+            </option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <!-- Prev Next -->
-    <div class="position-absolute mt-5 me-5 end-0 top-0">
-      <button
-        :disabled="page === 1"
-        type="button"
-        class="btn btn-info"
-        @click="prevPage"
-      >
-        Prev
-      </button>
-      <button type="button" class="btn btn-info" @click="nextPage">Next</button>
-    </div>
-    <!-- Loading -->
-    <loadingCard v-if="$fetchState.pending" />
+      <!-- Prev Next -->
+      <div class="position-absolute mt-5 me-5 end-0 top-0">
+        <button
+          :disabled="page === 1"
+          type="button"
+          class="btn btn-info"
+          @click="prevPage"
+        >
+          Prev
+        </button>
+        <button type="button" class="btn btn-info" @click="nextPage">
+          Next
+        </button>
+      </div>
+      <!-- Loading -->
+      <loadingCard v-if="$fetchState.pending" />
 
-    <!-- Search Movies -->
-    <div v-if="searchQuery !== ''" class="row">
-      <div
-        v-for="(movie, index) in resultQuery"
-        :key="index"
-        class="col-12 col-md-6 col-lg-3 mb-4"
-      >
-        <div class="card text-dark">
-          <div class="hover">
-            <img
-              class="card-img-top"
-              :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
-              alt=""
-            />
-          </div>
-          <div class="opacity0">
-            <NuxtLink
-              class="position-absolute top-50 start-50 translate-middle"
-              :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
-              ><button type="button" class="btn btn-secondary">
-                Info Selengkapnya
-              </button></NuxtLink
-            >
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              {{ movie.title.slice(0, 25) }}
-              <span v-if="movie.title.length > 25">...</span>
-            </h5>
-            <p
-              class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
-            >
-              {{ movie.vote_average.toFixed(1) }}
-            </p>
-            <!-- <p class="position-absolute top-100 start-100">
-              {{ movie.overview }}
-            </p> -->
-          </div>
-          <div class="card-footer">
-            <small class="text-muted">Released: {{ movie.release_date }}</small>
+      <!-- Search Movies -->
+      <div v-if="searchQuery !== ''" id="searchResults" class="row p-5">
+        <div
+          v-for="(movie, index) in resultQuery"
+          :key="index"
+          class="col-12 col-md-6 col-lg-3 mb-4"
+        >
+          <div class="card text-dark">
+            <div class="hover">
+              <img
+                class="card-img-top"
+                :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
+                alt=""
+              />
+            </div>
+            <div class="opacity0">
+              <NuxtLink
+                class="position-absolute top-50 start-50 translate-middle"
+                :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
+                ><button type="button" class="btn btn-secondary">
+                  Info Selengkapnya
+                </button></NuxtLink
+              >
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">
+                {{ movie.title.slice(0, 25) }}
+                <span v-if="movie.title.length > 25">...</span>
+              </h5>
+              <p
+                class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
+              >
+                {{ movie.vote_average.toFixed(1) }}
+              </p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted"
+                >Released: {{ movie.release_date }}</small
+              >
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Filtered Movies -->
-    <div v-else-if="selectedGenre !== ''" class="row">
-      <div
-        v-for="(movie, index) in filteredMovies"
-        :key="index"
-        class="col-12 col-md-6 col-lg-3 mb-4"
-      >
-        <div class="card text-dark">
-          <div class="hover">
-            <img
-              class="card-img-top"
-              :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
-              alt=""
-            />
-          </div>
-          <div class="opacity0">
-            <NuxtLink
-              class="position-absolute top-50 start-50 translate-middle"
-              :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
-              ><button type="button" class="btn btn-secondary">
-                Info Selengkapnya
-              </button></NuxtLink
-            >
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              {{ movie.title.slice(0, 25) }}
-              <span v-if="movie.title.length > 25">...</span>
-            </h5>
-            <p
-              class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
-            >
-              {{ movie.vote_average.toFixed(1) }}
-            </p>
-            <!-- <p class="position-absolute top-100 start-100">
-              {{ movie.overview }}
-            </p> -->
-          </div>
-          <div class="card-footer">
-            <small class="text-muted">Released: {{ movie.release_date }}</small>
+      <!-- Filtered Movies -->
+      <div v-else-if="selectedGenre !== ''" class="row">
+        <div
+          v-for="(movie, index) in filteredMovies"
+          :key="index"
+          class="col-12 col-md-6 col-lg-3 mb-4"
+        >
+          <div class="card text-dark">
+            <div class="hover">
+              <img
+                class="card-img-top"
+                :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
+                alt=""
+              />
+            </div>
+            <div class="opacity0">
+              <NuxtLink
+                class="position-absolute top-50 start-50 translate-middle"
+                :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
+                ><button type="button" class="btn btn-secondary">
+                  Info Selengkapnya
+                </button></NuxtLink
+              >
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">
+                {{ movie.title.slice(0, 25) }}
+                <span v-if="movie.title.length > 25">...</span>
+              </h5>
+              <p
+                class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
+              >
+                {{ movie.vote_average.toFixed(1) }}
+              </p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted"
+                >Released: {{ movie.release_date }}</small
+              >
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Movies  -->
-    <div v-else class="row">
-      <div
-        v-for="(movie, index) in movies"
-        :key="index"
-        class="col-12 col-md-6 col-lg-3 mb-4"
-      >
-        <div class="card text-dark">
-          <div class="hover">
-            <img
-              class="card-img-top"
-              :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
-              alt=""
-            />
-          </div>
-          <div class="opacity0">
-            <NuxtLink
-              class="position-absolute top-50 start-50 translate-middle"
-              :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
-              ><button type="button" class="btn btn-secondary">
-                Info Selengkapnya
-              </button></NuxtLink
-            >
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              {{ movie.title.slice(0, 25) }}
-              <span v-if="movie.title.length > 25">...</span>
-            </h5>
-            <p
-              class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
-            >
-              {{ movie.vote_average }}
-            </p>
-            <!-- <p class="position-absolute top-100 start-100">
-              {{ movie.overview }}
-            </p> -->
-          </div>
-          <div class="card-footer">
-            <small class="text-muted">Released: {{ movie.release_date }}</small>
+      <!-- Movies  -->
+      <div v-else class="row pt-3" id="Movies">
+        <div
+          v-for="(movie, index) in movies"
+          :key="index"
+          class="col-12 col-md-6 col-lg-3 mb-4"
+        >
+          <div class="card text-dark">
+            <div class="hover">
+              <img
+                class="card-img-top"
+                :src="`https://image.tmdb.org/t/p/w500/${movie.poster_path}`"
+                alt=""
+              />
+            </div>
+            <div class="opacity0">
+              <NuxtLink
+                class="position-absolute top-50 start-50 translate-middle"
+                :to="{ name: 'movies-movieid', params: { movieid: movie.id } }"
+                ><button type="button" class="btn btn-secondary">
+                  Info Selengkapnya
+                </button></NuxtLink
+              >
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">
+                {{ movie.title.slice(0, 25) }}
+                <span v-if="movie.title.length > 25">...</span>
+              </h5>
+              <p
+                class="rate text-white position-absolute top-0 start-0 d-flex justify-content-center align-items-center shadow"
+              >
+                {{ movie.vote_average }}
+              </p>
+            </div>
+            <div class="card-footer">
+              <small class="text-muted"
+                >Released: {{ movie.release_date }}</small
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -186,9 +174,10 @@
 
 <script>
 import axios from 'axios'
+import heroComponent from '../components/heroComponent.vue'
 import loadingCard from '../components/loadingCard.vue'
 export default {
-  components: { loadingCard },
+  components: { loadingCard, heroComponent },
   data() {
     return {
       movies: [],
@@ -269,7 +258,7 @@ export default {
         `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${this.page}`,
         {
           headers: {
-            Authorization: this.$config.myPrivateToken,
+            Authorization: process.env.apiToken,
             accept: 'application/json',
           },
         }
@@ -284,7 +273,7 @@ export default {
         `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1&query=${this.searchQuery}`,
         {
           headers: {
-            Authorization: this.$config.myPrivateToken,
+            Authorization: process.env.apiToken,
             accept: 'application/json',
           },
         }
@@ -295,18 +284,32 @@ export default {
       })
     },
 
-    clearSearch() {
-      this.searchQuery = ''
+    handleSearchQuery(query) {
       this.resultQuery = []
+      this.searchQuery = query
+      this.$fetch()
+
+      const searchResultElement = document.getElementById('searchResults')
+      if (searchResultElement) {
+        searchResultElement.scrollIntoView({ behavior: 'smooth' })
+      }
     },
 
     nextPage() {
+      const MoviesElement = document.getElementById('Movies')
+      if (MoviesElement) {
+        MoviesElement.scrollIntoView({ behavior: 'smooth' })
+      }
       this.page += 1
       this.movies = []
       return this.getMovies()
     },
 
     prevPage() {
+      const MoviesElement = document.getElementById('Movies')
+      if (MoviesElement) {
+        MoviesElement.scrollIntoView({ behavior: 'smooth' })
+      }
       if (this.page > 1) {
         this.page -= 1
       }

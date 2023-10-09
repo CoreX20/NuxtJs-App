@@ -1,21 +1,16 @@
 <template>
   <div id="app">
-    <HeaderWeb />
-    <Nuxt keep-alive />
+    <FooterWeb />
+    <Nuxt />
   </div>
 </template>
-
-
 <script>
-import HeaderWeb from '../components/headerWeb.vue'
+import FooterWeb from '../components/footerWeb.vue'
 
 export default {
-  components: {
-    HeaderWeb,
-  },
+  components: { FooterWeb },
 }
 </script>
-
 <style scoped>
 #app {
   background: rgba(0, 1, 22, 1);

@@ -1,7 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'aplikasi-nuxt',
+    title: 'Movie Review',
     htmlAttrs: {
       lang: 'en',
     },
@@ -13,19 +13,26 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel : 'stylesheet', href : 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css'}
+      { rel : 'stylesheet', href : 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css'},
+      { rel : "stylesheet", href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"}
     ],
     script: [
       { src : 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js', body: true}
     ]
   },
 
-  privateRuntimeConfig: {
-    myPrivateToken: process.env.API_ACCESS_TOKEN
+  env: {
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseKey: process.env.SUPABASE_KEY,
+    apiToken: process.env.API_ACCESS_TOKEN
   },
 
+  router: {
+    middleware: ['authenticated'],
+  },
+  
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [],
+  css: ['~/assets/main.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [],
@@ -48,7 +55,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: '/',
+    baseURL: '',
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

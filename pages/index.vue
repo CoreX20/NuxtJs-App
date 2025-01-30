@@ -258,7 +258,7 @@ export default {
         `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${this.page}`,
         {
           headers: {
-            Authorization: process.env.apiToken,
+            Authorization: `Bearer ${process.env.apiToken}`,
             accept: 'application/json',
           },
         }
